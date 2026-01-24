@@ -102,7 +102,13 @@ vim.g.have_nerd_font = false
 vim.o.number = true
 -- You can also add relative line numbers, to help with jumping.
 --  Experiment for yourself to see if you like it!
--- vim.o.relativenumber = true
+vim.o.relativenumber = true
+
+-- Set default indentation to 2 spaces
+vim.o.tabstop = 2
+vim.o.shiftwidth = 2
+vim.o.softtabstop = 2
+vim.o.expandtab = true
 
 -- Enable mouse mode, can be useful for resizing splits for example!
 vim.o.mouse = 'a'
@@ -175,6 +181,9 @@ vim.keymap.set('n', '<Esc>', '<cmd>nohlsearch<CR>')
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist, { desc = 'Open diagnostic [Q]uickfix list' })
+
+-- Open file explorer
+vim.keymap.set('n', '<leader>pv', vim.cmd.Ex, { desc = '[P]roject [V]iew (Netrw)' })
 
 -- Exit terminal mode in the builtin terminal with a shortcut that is a bit easier
 -- for people to discover. Otherwise, you normally need to press <C-\><C-n>, which
@@ -672,7 +681,7 @@ require('lazy').setup({
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
         -- clangd = {},
-        -- gopls = {},
+        gopls = {},
         -- pyright = {},
         -- rust_analyzer = {},
         -- ... etc. See `:help lspconfig-all` for a list of all the pre-configured LSPs
@@ -681,8 +690,11 @@ require('lazy').setup({
         --    https://github.com/pmizio/typescript-tools.nvim
         --
         -- But for many setups, the LSP (`ts_ls`) will work just fine
-        -- ts_ls = {},
-        --
+        ts_ls = {},
+
+        html = {},
+
+        cssls = {},
 
         lua_ls = {
           -- cmd = { ... },
@@ -990,6 +1002,75 @@ require('lazy').setup({
   -- Or use telescope!
   -- In normal mode type `<space>sh` then write `lazy.nvim-plugin`
   -- you can continue same window with `<space>sr` which resumes last telescope search
+  -- Add 99 plugin here in the main plugins array
+  {
+    'ThePrimeagen/99',
+    config = function()
+      local _99 = require '99'
+
+      -- For logging that is to a file if you wish to trace through requests
+      -- for reporting bugs, i would not rely on this, but instead the provided
+      -- logging mechanisms within 99.  This is for more debugging purposes
+      local cwd = vim.uv.cwd()
+      local basename = vim.fs.basename(cwd)
+      _99.setup {
+        model = 'anthropic/claude-sonnet-4-5', -- Use correct model name
+        logger = {
+          level = _99.DEBUG,
+          path = '/tmp/' .. basename .. '.99.debug',
+          print_on_error = true,
+        },
+
+        --- A new feature that is centered around tags
+        completion = {
+          --- What autocomplete do you use.  We currently only
+          --- support cmp right now. Set to nil since we use blink.cmp
+          source = nil,
+        },
+
+        --- WARNING: if you change cwd then this is likely broken
+        --- ill likely fix this in a later change
+        ---
+        --- md_files is a list of files to look for and auto add based on the location
+        --- of the originating request.  That means if you are at /foo/bar/baz.lua
+        --- the system will automagically look for:
+        --- /foo/bar/AGENT.md
+        --- /foo/AGENT.md
+        --- assuming that /foo is project root (based on cwd)
+        md_files = {
+          'AGENT.md',
+        },
+      }
+
+      -- Create your own short cuts for the different types of actions
+      vim.keymap.set('n', '<leader>9f', function()
+        _99.fill_in_function()
+      end)
+      -- take extra note that i have visual selection only in v mode
+      -- technically whatever your last visual selection is, will be used
+      -- so i have this set to visual mode so i dont screw up and use an
+      -- old visual selection
+      --
+      -- likely ill add a mode check and assert on required visual mode
+      -- so just prepare for it now
+      vim.keymap.set('v', '<leader>9v', function()
+        _99.visual()
+      end)
+
+      --- if you have a request you dont want to make any changes, just cancel it
+      vim.keymap.set('v', '<leader>9s', function()
+        _99.stop_all_requests()
+      end)
+
+      --- Example: Using rules + actions for custom behaviors
+      --- Create a rule file like ~/.rules/debug.md that defines custom behavior.
+      --- For instance, a "debug" rule could automatically add printf statements
+      --- throughout a function to help debug its execution flow.
+      vim.keymap.set('n', '<leader>9fd', function()
+        _99.fill_in_function()
+      end)
+    end,
+  },
 }, {
   ui = {
     -- If you are using a Nerd Font: set icons to an empty table which will use the
