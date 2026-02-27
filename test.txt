@@ -1,0 +1,21 @@
+I'll create a simple hello world function in Lua for you:
+
+```lua
+function helloWorld()
+  print("Hello, World!")
+end
+```
+
+This function, when called, will output "Hello, World!" to the console. You can call it with:
+
+```lua
+helloWorld()
+```
+
+If you need a function that returns the string instead of printing it:
+
+```lua
+function helloWorld()
+  return "Hello, World!"
+end
+```
