@@ -1,6 +1,5 @@
 return {
-  'ThePrimeagen/99',
-  dir = '/Users/stephaniegredell/projects/99',
+  dir = '/home/stephanie/Projects/99/',
   dev = true,
   config = function()
     local ok, _99 = pcall(require, '99')
