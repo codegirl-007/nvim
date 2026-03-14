@@ -92,8 +92,6 @@ rtp:prepend(lazypath)
 -- NOTE: Here is where you install your plugins.
 require('lazy').setup({
   -- NOTE: Plugins can be added with a link (or for a github repo: 'owner/repo' link).
-  'NMAC427/guess-indent.nvim', -- Detect tabstop and shiftwidth automatically
-
   { -- Useful plugin to show you pending keybinds.
     'folke/which-key.nvim',
     event = 'VimEnter', -- Sets the loading event to 'VimEnter'
@@ -337,6 +335,7 @@ require('lazy').setup({
       local capabilities = vim.g.cmp_capabilities or vim.lsp.protocol.make_client_capabilities()
 
       local servers = {
+        clangd = {},
         gopls = {},
         ts_ls = {},
         html = {},
@@ -353,7 +352,7 @@ require('lazy').setup({
       }
 
       local ensure_installed = vim.tbl_keys(servers or {})
-      vim.list_extend(ensure_installed, { 'stylua' })
+      vim.list_extend(ensure_installed, { 'prettier', 'stylua' })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
       require('mason-lspconfig').setup {
@@ -397,6 +396,13 @@ require('lazy').setup({
       end,
       formatters_by_ft = {
         lua = { 'stylua' },
+        javascript = { 'prettier' },
+        typescript = { 'prettier' },
+        json = { 'prettier' },
+        html = { 'prettier' },
+        css = { 'prettier' },
+        yaml = { 'prettier' },
+        markdown = { 'prettier' },
       },
     },
   },
